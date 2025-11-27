@@ -15,6 +15,8 @@
 package llminternal
 
 import (
+	"fmt"
+
 	"google.golang.org/adk/agent"
 	"google.golang.org/adk/internal/utils"
 	"google.golang.org/adk/model"
@@ -31,12 +33,12 @@ func identityRequestProcessor(ctx agent.InvocationContext, req *model.LLMRequest
 	}
 
 	// Add identity information to system instructions.
-	var identityInstructions []string
+	identityInstructions := make([]string, 0, 2)
 	if name := ctx.Agent().Name(); name != "" {
-		identityInstructions = append(identityInstructions, `You are an agent. Your internal name is "`+name+`".`)
+		identityInstructions = append(identityInstructions, fmt.Sprintf(`You are an agent. Your internal name is %q.`, name))
 	}
 	if description := ctx.Agent().Description(); description != "" {
-		identityInstructions = append(identityInstructions, `The description about you is "`+description+`".`)
+		identityInstructions = append(identityInstructions, fmt.Sprintf(`The description about you is %q.`, description))
 	}
 
 	// Append identity instructions to the system instruction.

@@ -15,6 +15,7 @@
 package llminternal
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -62,6 +63,16 @@ func Test_identityRequestProcessor(t *testing.T) {
 			req:            &model.LLMRequest{},
 			wantErr:        false,
 			wantSystemInst: `You are an agent. Your internal name is "HelperBot".` + "\n\n" + `The description about you is "A friendly assistant that helps users with their tasks".`,
+		},
+		{
+			name: "LLM agent with special characters in name and description",
+			agentConfig: agent.Config{
+				Name:        `"Test" Agent`,
+				Description: `A "helpful" assistant`,
+			},
+			req:            &model.LLMRequest{},
+			wantErr:        false,
+			wantSystemInst: `You are an agent. Your internal name is "\"Test\" Agent".` + "\n\n" + `The description about you is "A \"helpful\" assistant".`,
 		},
 		{
 			name: "LLM agent with existing system instruction - appends to existing",
@@ -131,40 +142,19 @@ func Test_identityRequestProcessor(t *testing.T) {
 			}
 
 			// Check the system instruction
-			if tc.wantSystemInst != "" {
-				if tc.req.Config == nil || tc.req.Config.SystemInstruction == nil {
-					t.Errorf("expected system instruction to be set")
-					return
-				}
-
-				gotText := ""
+			var gotText string
+			if tc.req.Config != nil && tc.req.Config.SystemInstruction != nil {
+				var texts []string
 				for _, part := range tc.req.Config.SystemInstruction.Parts {
 					if part.Text != "" {
-						if gotText != "" {
-							gotText += "\n\n"
-						}
-						gotText += part.Text
+						texts = append(texts, part.Text)
 					}
 				}
+				gotText = strings.Join(texts, "\n\n")
+			}
 
-				if diff := cmp.Diff(tc.wantSystemInst, gotText); diff != "" {
-					t.Errorf("system instruction mismatch (-want +got):\n%s", diff)
-				}
-			} else {
-				if tc.req.Config != nil && tc.req.Config.SystemInstruction != nil {
-					gotText := ""
-					for _, part := range tc.req.Config.SystemInstruction.Parts {
-						if part.Text != "" {
-							if gotText != "" {
-								gotText += "\n\n"
-							}
-							gotText += part.Text
-						}
-					}
-					if gotText != "" {
-						t.Errorf("expected no system instruction, got: %s", gotText)
-					}
-				}
+			if diff := cmp.Diff(tc.wantSystemInst, gotText); diff != "" {
+				t.Errorf("system instruction mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

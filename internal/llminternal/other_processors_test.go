@@ -51,7 +51,7 @@ func Test_identityRequestProcessor(t *testing.T) {
 			},
 			req:            &model.LLMRequest{},
 			wantErr:        false,
-			wantSystemInst: `The description about you is: "A helpful assistant that answers questions".`,
+			wantSystemInst: `The description about you is "A helpful assistant that answers questions".`,
 		},
 		{
 			name: "LLM agent with both name and description - adds both instructions",
@@ -61,7 +61,7 @@ func Test_identityRequestProcessor(t *testing.T) {
 			},
 			req:            &model.LLMRequest{},
 			wantErr:        false,
-			wantSystemInst: `You are an agent. Your internal name is "HelperBot".` + "\n\n" + `The description about you is: "A friendly assistant that helps users with their tasks".`,
+			wantSystemInst: `You are an agent. Your internal name is "HelperBot".` + "\n\n" + `The description about you is "A friendly assistant that helps users with their tasks".`,
 		},
 		{
 			name: "LLM agent with existing system instruction - appends to existing",
@@ -77,7 +77,7 @@ func Test_identityRequestProcessor(t *testing.T) {
 			wantErr: false,
 			wantSystemInst: "Existing system instruction\n\n" +
 				`You are an agent. Your internal name is "ExistingAgent".` + "\n\n" +
-				`The description about you is: "Agent with existing instructions".`,
+				`The description about you is "Agent with existing instructions".`,
 		},
 		{
 			name: "LLM agent with existing config but no system instruction - creates new",
@@ -92,7 +92,7 @@ func Test_identityRequestProcessor(t *testing.T) {
 			},
 			wantErr: false,
 			wantSystemInst: `You are an agent. Your internal name is "ConfigAgent".` + "\n\n" +
-				`The description about you is: "Agent with existing config".`,
+				`The description about you is "Agent with existing config".`,
 		},
 		{
 			name:           "Non-LLM agent - does nothing and returns no error",
